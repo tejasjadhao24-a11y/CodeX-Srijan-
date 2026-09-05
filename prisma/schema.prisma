@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                      String          @id @default(cuid())
+  name                    String
+  avgTransactionAmount    Float           @default(2000.0)
+  normalActiveHoursStart  Int             @default(8)
+  normalActiveHoursEnd    Int             @default(22)
+  createdAt               DateTime        @default(now())
+  isMinor                 Boolean         @default(false)
+  guardianUserId          String?
+  guardian                User?           @relation("GuardianDependents", fields: [guardianUserId], references: [id], onDelete: SetNull)
+  dependents              User[]          @relation("GuardianDependents")
+  knownDevices            String          @default("[\"dev_macbook_pro\", \"dev_iphone_15\"]") // JSON array string
+  usualLocations          String          @default("[\"New York, US\", \"Jersey City, US\"]") // JSON array string
+  minorSpendLimit         Float           @default(50.0) // Per-transaction approval threshold for minor
+  beneficiaries           Beneficiary[]
+  transactions            Transaction[]
+  guardianAlerts          GuardianAlert[] @relation("GuardianUserAlerts")
+}
+
+model Beneficiary {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  accountNumber String
+  category      String        @default("general") // 'gaming', 'gambling', 'crypto', 'gift_cards', 'utilities', 'corporate', 'personal'
+  isKnown       Boolean       @default(true)
+  addedAt       DateTime      @default(now())
+  transactions  Transaction[]
+}
+
+model Transaction {
+  id                       String         @id @default(cuid())
+  userId                   String
+  user                     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  beneficiaryId            String?
+  beneficiary              Beneficiary?   @relation(fields: [beneficiaryId], references: [id], onDelete: SetNull)
+  beneficiaryName          String
+  amount                   Float
+  timestamp                DateTime       @default(now())
+  riskScore                Int            @default(0)
+  riskLevel                String         @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  riskFactors              String         // JSON stringified array of risk factor objects
+  socialEngineeringAnswer  String?
+  socialEngineeringScore   Int?
+  deepfakeScore            Int?
+  finalRiskLevel           String?
+  actionTaken              String?        // PROCEED, PAUSE_VERIFY, HOLD_ESCALATE
+  status                   String         @default("PENDING") // PENDING, APPROVED, CANCELLED, HELD
+  
+  // Expanded Heuristics Telemetry
+  deviceId                 String?
+  location                 String?
+  category                 String?
+  deviceRecognized         Boolean        @default(true)
+  locationAnomaly          Boolean        @default(false)
+  isMinorTransaction       Boolean        @default(false)
+  
+  // Guardian Protection
+  guardianAlert            GuardianAlert?
+}
+
+model GuardianAlert {
+  id             String      @id @default(cuid())
+  transactionId  String      @unique
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  guardianUserId String
+  guardian       User        @relation("GuardianUserAlerts", fields: [guardianUserId], references: [id], onDelete: Cascade)
+  amount         Float
+  category       String
+  createdAt      DateTime    @default(now())
+  acknowledged   Boolean     @default(false)
+  status         String      @default("PENDING") // PENDING, APPROVED, REJECTED
+}
