@@ -37,3 +37,6 @@ next-env.d.ts
 *.db-journal
 *.db-shm
 *.db-wal
+
+# Vosk AI models (auto-downloaded by python vosk Model(lang="en-us"))
+models/

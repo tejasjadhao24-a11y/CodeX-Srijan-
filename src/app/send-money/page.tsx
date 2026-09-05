@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import RiskGauge from '@/components/RiskGauge';
 import InterventionModal from '@/components/InterventionModal';
+import SequentialRiskBreakdown from '@/components/SequentialRiskBreakdown';
 import { RiskLevel, ActionTaken } from '@/lib/types';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -687,42 +688,13 @@ export default function SendMoneyPage() {
             />
           </div>
 
-          {/* Checklist */}
-          <div className="space-y-2 pt-2 border-t border-slate-800">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-slate-400 uppercase font-semibold">
-                Detected Threat Factors ({previewFactors.length})
-              </span>
-              <span className="text-[10px] font-mono text-cyan-400">Server Rules</span>
-            </div>
-
-            {previewFactors.length === 0 ? (
-              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span>Zero anomalous triggers. Safe baseline parameters.</span>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                {previewFactors.map((factor, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-lg bg-slate-900/70 border border-slate-800/80 flex items-start justify-between gap-3 text-xs"
-                  >
-                    <div className="min-w-0">
-                      <span className="text-[10px] font-mono font-semibold text-cyan-400 block truncate">
-                        [{factor.code}]
-                      </span>
-                      <p className="text-slate-300 mt-0.5 leading-snug">{factor.text}</p>
-                    </div>
-                    {factor.points && (
-                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-800 whitespace-nowrap flex-shrink-0 ml-2">
-                        +{factor.points}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+          {/* Sequential Factor-by-Factor Breakdown */}
+          <div className="pt-2 border-t border-slate-800">
+            <SequentialRiskBreakdown
+              baseScore={previewScore}
+              riskFactors={previewFactors}
+              autoAnimate={true}
+            />
           </div>
         </div>
 

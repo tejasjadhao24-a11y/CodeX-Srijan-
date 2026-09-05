@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { X, ShieldAlert, CheckCircle2, Clock, AlertTriangle, Code, ListFilter, Copy, Check } from 'lucide-react';
 import RiskGauge from './RiskGauge';
+import SequentialRiskBreakdown from './SequentialRiskBreakdown';
 
 interface TransactionDrawerProps {
   isOpen: boolean;
@@ -120,39 +121,16 @@ export default function TransactionDrawer({
                 </div>
               </div>
 
-              {/* Dynamic Risk Factors Breakdown List */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Server-Evaluated Risk Factors ({riskFactors.length})
-                </h4>
-
-                {riskFactors.length === 0 ? (
-                  <div className="p-4 rounded-lg bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Clean heuristic profile. Zero risk anomalies detected.</span>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {riskFactors.map((factor: any, i: number) => (
-                      <div
-                        key={i}
-                        className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 flex items-start justify-between gap-3 text-xs"
-                      >
-                        <div className="space-y-0.5">
-                          <span className="font-mono text-[10px] font-semibold text-cyan-400 block">
-                            [{factor.code}]
-                          </span>
-                          <p className="text-slate-200">{factor.text}</p>
-                        </div>
-                        {factor.points && (
-                          <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-red-950/60 border border-red-800/40 text-red-400 whitespace-nowrap font-bold">
-                            +{factor.points} pts
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* Factor-by-Factor Sequential Breakdown */}
+              <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+                <SequentialRiskBreakdown
+                  baseScore={transaction.riskScore}
+                  riskFactors={riskFactors}
+                  socialScore={transaction.socialEngineeringScore}
+                  voiceScore={transaction.voiceSignalScore}
+                  transcript={transaction.transcript}
+                  autoAnimate={false}
+                />
               </div>
 
               {/* Additional Threat Modules (Social Engineering & Deepfake) */}

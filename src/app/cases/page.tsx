@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import RiskBadge from '@/components/RiskBadge';
 import { TableRowSkeleton } from '@/components/SkeletonLoader';
+import SequentialRiskBreakdown from '@/components/SequentialRiskBreakdown';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -233,32 +234,16 @@ export default function CasesPage() {
                           <td colSpan={8} className="p-5 sm:p-6">
                             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                               
-                              {/* Heuristics List */}
-                              <div className="xl:col-span-2 space-y-3">
-                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-2">
-                                  <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                                  <span>Evaluated Heuristic Triggers</span>
-                                </h4>
-                                <div className="space-y-2">
-                                  {c.riskFactors?.map((rf: any, i: number) => (
-                                    <div
-                                      key={i}
-                                      className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex items-start justify-between gap-3 text-xs"
-                                    >
-                                      <div className="min-w-0">
-                                        <span className="font-mono text-[10px] text-cyan-400 font-semibold block truncate">
-                                          [{rf.code}]
-                                        </span>
-                                        <span className="text-slate-300 leading-snug">{rf.text}</span>
-                                      </div>
-                                      {rf.points && (
-                                        <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-800 whitespace-nowrap flex-shrink-0 ml-2">
-                                          +{rf.points} pts
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
+                              {/* Sequential Heuristics Breakdown */}
+                              <div className="xl:col-span-2">
+                                <SequentialRiskBreakdown
+                                  baseScore={c.riskScore}
+                                  riskFactors={c.riskFactors || []}
+                                  socialScore={c.socialEngineeringScore}
+                                  voiceScore={c.voiceSignalScore}
+                                  transcript={c.transcript}
+                                  autoAnimate={false}
+                                />
                               </div>
 
                               {/* Forensic Telemetry Card */}
@@ -284,13 +269,19 @@ export default function CasesPage() {
                                       </div>
                                     </div>
 
+                                    {/* Vosk Speech Transcript & Voice Score */}
                                     <div className="flex items-start gap-2.5 pt-2 border-t border-slate-800">
                                       <Mic className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
                                       <div className="min-w-0">
-                                        <span className="text-slate-400 text-[10px] block">Synthetic Audio Biomarker:</span>
+                                        <span className="text-slate-400 text-[10px] block">Vosk Speech-to-Text & Phrases:</span>
                                         <span className="text-white font-mono font-semibold truncate block">
-                                          {c.deepfakeScore ? `${c.deepfakeScore}% Synthetic Pattern` : 'No audio sample submitted'}
+                                          {c.voiceSignalScore ? `+${c.voiceSignalScore} pts Threat` : c.transcript ? '0 pts (Clean Speech)' : 'No audio sample analyzed'}
                                         </span>
+                                        {c.transcript && (
+                                          <p className="text-[10px] text-slate-400 font-sans italic mt-1 line-clamp-2 leading-snug">
+                                            &ldquo;{c.transcript}&rdquo;
+                                          </p>
+                                        )}
                                       </div>
                                     </div>
 

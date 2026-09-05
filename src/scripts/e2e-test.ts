@@ -153,7 +153,58 @@ async function runExpandedE2ETests() {
   });
   if (settingsData.minorSpendLimit !== 75) throw new Error('Expected new spend limit 75');
 
-  console.log('\n🎉 ALL EXPANDED RISK HEURISTICS & GUARDIAN MODE TESTS PASSED WITH 100% SUCCESS!');
+  // 10. Test REAL VOSK VOICE ANALYSIS: POST /api/transactions/:id/voice-check
+  console.log('\nTesting Real Vosk Speech-to-Text & Threat Phrase Detection...');
+  const voiceCheckRes = await fetch(`${baseUrl}/api/transactions/${minorTxData.transactionId}/voice-check`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ demoPreset: 'scam' }),
+  });
+  const voiceCheckData = await voiceCheckRes.json();
+  console.log('✅ Vosk Scam Audio Analysis:', {
+    success: voiceCheckData.success,
+    transcriptLength: voiceCheckData.transcript?.length,
+    voiceSignalScore: voiceCheckData.voiceSignalScore,
+    matchedPhrasesCount: voiceCheckData.matchedPhrases?.length,
+    disclaimer: voiceCheckData.disclaimer?.substring(0, 40) + '...',
+  });
+  if (!voiceCheckData.success) throw new Error('Expected voice check success to be true');
+  if (!voiceCheckData.transcript || !voiceCheckData.transcript.includes('ceo')) {
+    throw new Error('Expected transcript to contain spoken word "ceo"');
+  }
+  if (voiceCheckData.voiceSignalScore <= 0) {
+    throw new Error('Expected voiceSignalScore > 0 on scam audio');
+  }
+
+  // Test Clean Control Audio
+  const cleanVoiceRes = await fetch(`${baseUrl}/api/transactions/${minorTxData.transactionId}/voice-check`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ demoPreset: 'normal' }),
+  });
+  const cleanVoiceData = await cleanVoiceRes.json();
+  console.log('✅ Vosk Legitimate Audio Analysis:', {
+    transcript: cleanVoiceData.transcript,
+    voiceSignalScore: cleanVoiceData.voiceSignalScore,
+  });
+  if (cleanVoiceData.voiceSignalScore !== 0) {
+    throw new Error('Expected 0 threat points on clean audio');
+  }
+
+  // 11. Test PATCH /api/transactions/:id/finalize with voice threat integration
+  const finalizeRes = await fetch(`${baseUrl}/api/transactions/${minorTxData.transactionId}/finalize`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  const finalizeData = await finalizeRes.json();
+  console.log('✅ Final Decision Gate with Voice Integration:', {
+    finalScore: finalizeData.transaction.finalScore,
+    finalRiskLevel: finalizeData.transaction.finalRiskLevel,
+    actionTaken: finalizeData.transaction.actionTaken,
+  });
+
+  console.log('\n🎉 ALL 11 END-TO-END TESTS (HEURISTICS, GUARDIAN MODE, & REAL VOSK VOICE ANALYSIS) PASSED WITH 100% SUCCESS!');
 }
 
 runExpandedE2ETests().catch((err) => {

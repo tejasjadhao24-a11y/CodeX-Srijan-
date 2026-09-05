@@ -99,3 +99,19 @@ export interface GuardianStatsResponse {
   categorySpend: Record<string, number>;
   merchantSpend: Record<string, number>;
 }
+
+export interface MatchedPhrase {
+  phrase: string;
+  category: 'urgency' | 'authority' | 'secrecy' | 'isolation';
+  snippet: string;
+  points: number;
+}
+
+export interface VoiceCheckResponse {
+  success: boolean;
+  transcript: string;
+  voiceSignalScore: number;
+  matchedPhrases: MatchedPhrase[];
+  disclaimer: string;
+  error?: string;
+}

@@ -37,6 +37,12 @@ export default function GuardianDashboardPage() {
   const merchantSpend = data?.merchantSpend || {};
   const activeMinor = minors[0] || null;
 
+  React.useEffect(() => {
+    if (activeMinor?.minorSpendLimit !== undefined) {
+      setNewLimit(activeMinor.minorSpendLimit.toString());
+    }
+  }, [activeMinor?.minorSpendLimit]);
+
   const handleAlertAction = async (alertId: string, status: 'APPROVED' | 'REJECTED') => {
     setUpdatingAlertId(alertId);
     try {

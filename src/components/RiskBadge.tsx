@@ -23,26 +23,26 @@ export default function RiskBadge({
         return {
           icon: ShieldCheck,
           label: 'LOW',
-          classes: 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40',
+          classes: 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40 shadow-sm shadow-emerald-500/20',
         };
       case 'MEDIUM':
         return {
           icon: AlertTriangle,
           label: 'MED',
-          classes: 'bg-amber-950/80 text-amber-400 border-amber-500/40',
+          classes: 'bg-amber-950/80 text-amber-400 border-amber-500/40 shadow-sm shadow-amber-500/20',
         };
       case 'HIGH':
         return {
           icon: ShieldAlert,
           label: 'HIGH',
-          classes: 'bg-orange-950/80 text-orange-400 border-orange-500/50 animate-pulse',
+          classes: 'bg-orange-950/80 text-orange-400 border-orange-500/50 shadow-sm shadow-orange-500/30',
         };
       case 'CRITICAL':
       default:
         return {
           icon: Flame,
           label: 'CRITICAL',
-          classes: 'bg-red-950/90 text-red-400 border-red-500/60 animate-pulse',
+          classes: 'bg-red-950/90 text-red-400 border-red-500/60 shadow-md shadow-red-500/40 animate-pulse',
         };
     }
   };

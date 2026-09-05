@@ -65,6 +65,11 @@ model Transaction {
   locationAnomaly          Boolean        @default(false)
   isMinorTransaction       Boolean        @default(false)
   
+  // Real Voice Analysis Telemetry
+  transcript               String?
+  voiceSignalScore         Int?
+  matchedPhrases           String?        // JSON string of [{ phrase, category, snippet }]
+  
   // Guardian Protection
   guardianAlert            GuardianAlert?
 }

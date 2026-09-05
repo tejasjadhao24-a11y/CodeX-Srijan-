@@ -23,11 +23,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     const baseScore = tx.riskScore || 0;
     const socialScore = tx.socialEngineeringScore || 0;
     const deepfakeScore = tx.deepfakeScore || 0;
+    const voiceScore = tx.voiceSignalScore || 0;
 
     // Calculate composite final risk score
     // Higher of base score or additive escalation from threat indicators
-    const additionalThreats = Math.round((socialScore * 0.6) + (deepfakeScore * 0.3));
-    const finalScore = Math.min(100, Math.max(baseScore, Math.round(baseScore * 0.7 + additionalThreats)));
+    const additionalThreats = Math.round((socialScore * 0.4) + (voiceScore * 0.4) + (deepfakeScore * 0.2));
+    const finalScore = Math.min(100, Math.max(baseScore, Math.round(baseScore * 0.6 + additionalThreats)));
 
     let finalRiskLevel: RiskLevel = 'LOW';
     let actionTaken: ActionTaken = 'PROCEED';
@@ -69,6 +70,8 @@ export async function PATCH(request: Request, context: RouteContext) {
         beneficiaryName: updated.beneficiaryName,
         baseScore,
         socialEngineeringScore: updated.socialEngineeringScore,
+        voiceSignalScore: updated.voiceSignalScore,
+        transcript: updated.transcript,
         deepfakeScore: updated.deepfakeScore,
         finalScore: updated.riskScore,
         finalRiskLevel: updated.finalRiskLevel,
